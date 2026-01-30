@@ -1,3 +1,4 @@
+#include "init.h"
 #include "stm32f4xx.h"
 #include "uart1toRS485.h"
 #include "uart2toRS485.h"
@@ -8,7 +9,7 @@
 #include "crc16.h"
 #include "fram.h"
 
-#include "rtc.h"
+//#include "rtc.h"
 #include "DIO.h"
 #include "stm32f4xx_i2c.h"
 #include "intmash_dsp.h"
@@ -22,7 +23,11 @@ ErrorStatus HSEStartUpStatus;
 void  ADCs_Configuration(void); 
 void  TIM8_Configuration(void); 
 
-//--------------------------------------------------------------
+//-------------------------------------------------------Tx1DM 
+
+
+
+
 
 void GPIO_Configuration(void) {
   GPIO_InitTypeDef GPIO_InitStructure; 

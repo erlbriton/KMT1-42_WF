@@ -285,7 +285,7 @@
                 <option>
                     <name>CCAllowList</name>
                     <version>1</version>
-                    <state>00000000</state>
+                    <state>10010100</state>
                 </option>
                 <option>
                     <name>CCDebugInfo</name>
@@ -356,6 +356,7 @@
                     <state>$PROJ_DIR$\..\Utilities</state>
                     <state>$PROJ_DIR$\..\DExS_M4CPU</state>
                     <state>$PROJ_DIR$\..\User</state>
+                    <state>$PROJ_DIR$\User</state>
                     <state>$PROJ_DIR$\..\EFI_CPU</state>
                     <state>$PROJ_DIR$\..\rectifier</state>
                 </option>
@@ -373,16 +374,16 @@
                 </option>
                 <option>
                     <name>CCOptLevel</name>
-                    <state>0</state>
+                    <state>2</state>
                 </option>
                 <option>
                     <name>CCOptStrategy</name>
                     <version>0</version>
-                    <state>0</state>
+                    <state>2</state>
                 </option>
                 <option>
                     <name>CCOptLevelSlave</name>
-                    <state>0</state>
+                    <state>2</state>
                 </option>
                 <option>
                     <name>CompilerMisraRules98</name>
@@ -408,7 +409,7 @@
                 </option>
                 <option>
                     <name>IccLang</name>
-                    <state>2</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IccCDialect</name>
@@ -420,11 +421,11 @@
                 </option>
                 <option>
                     <name>IccStaticDestr</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IccCppInlineSemantics</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IccCmsis</name>
@@ -441,7 +442,7 @@
                 <option>
                     <name>CCOptStrategySlave</name>
                     <version>0</version>
-                    <state>0</state>
+                    <state>2</state>
                 </option>
                 <option>
                     <name>CCGuardCalls</name>
@@ -3212,19 +3213,16 @@
             <name>$PROJ_DIR$\..\EFI_CPU\DIO.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\EFI_CPU\fram.c</name>
+            <name>$PROJ_DIR$\..\EFI_CPU\fram.cpp</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\EFI_CPU\init.c</name>
+            <name>$PROJ_DIR$\..\EFI_CPU\init.cpp</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\EFI_CPU\rtc.c</name>
+            <name>$PROJ_DIR$\..\EFI_CPU\uart1toRS485.cpp</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\EFI_CPU\uart1toRS485.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\EFI_CPU\uart2toRS485.c</name>
+            <name>$PROJ_DIR$\..\EFI_CPU\uart2toRS485.cpp</name>
         </file>
     </group>
     <group>
@@ -3290,25 +3288,25 @@
     <group>
         <name>User</name>
         <file>
-            <name>$PROJ_DIR$\..\User\AIO.c</name>
+            <name>$PROJ_DIR$\..\User\AIO.cpp</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\User\CDdata.c</name>
+            <name>$PROJ_DIR$\..\User\CDdata.cpp</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\User\EFI_CPU.c</name>
+            <name>$PROJ_DIR$\..\User\EFI_CPU.cpp</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\User\flashdata.c</name>
+            <name>$PROJ_DIR$\..\User\flashdata.cpp</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\User\main.cpp</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\User\modbus.c</name>
+            <name>$PROJ_DIR$\..\User\modbus.cpp</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\User\ramdata.c</name>
+            <name>$PROJ_DIR$\..\User\ramdata.cpp</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\User\stm32f4xx_it.c</name>
@@ -3317,13 +3315,13 @@
     <group>
         <name>Utilities</name>
         <file>
-            <name>$PROJ_DIR$\..\Utilities\crc16.c</name>
+            <name>$PROJ_DIR$\..\Utilities\crc16.cpp</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\Utilities\id.c</name>
+            <name>$PROJ_DIR$\..\Utilities\id.cpp</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\Utilities\memutil.c</name>
+            <name>$PROJ_DIR$\..\Utilities\memutil.cpp</name>
         </file>
     </group>
 </project>

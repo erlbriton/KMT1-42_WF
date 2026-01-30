@@ -103,12 +103,12 @@ void TIM5_IRQHandler(void)
   TIM5->SR = 0;         
 }
 
-void TIM6_DAC_IRQHandler(void)
-{  
-  TIM6->SR ^= TIM_IT_Update;
-  DIO_work();  
-  RAM_DATA.DI_reg = RAM_DATA.DI_reg& 0x00ff; //если этого не сделать, то старший байт будет ff, потому что читаю только один байт
-}
+//void TIM6_DAC_IRQHandler(void)
+//{  
+//  TIM6->SR ^= TIM_IT_Update;
+//  DIO_work();  
+//  RAM_DATA.DI_reg = RAM_DATA.DI_reg& 0x00ff; //если этого не сделать, то старший байт будет ff, потому что читаю только один байт
+//}
 
 //u8 Enable_mtz=0;
 
@@ -126,39 +126,59 @@ void DMA2_Stream4_IRQHandler(void)//стрим ДМА, работающий с данными собственных 
   DMA_Cmd(DMA2_Stream3, ENABLE);
   //-----------------------------------------------------
 
-  static u16  Cnt_100hz = 0; //счетчик для усреднения по 100 Гц 
+  //static u16  Cnt_100hz = 0; //счетчик для усреднения по 100 Гц 
   static u16 Cnt_50hz = 0; //счетчик для усреднения по периоду
   float fIomax = 0;
   float fIo = 0;
    
 //=========================Измерение переменного  тока=================================================  
 
-  New_Iomax = filter1_Low(&Filter_Iomax, ((float)(AIN_buf[Io_max]-CD_DATA.O_Iomax)*CD_DATA.K_Iomax));//фильтрую, убираю постоянную,  теперь он +-
-  New_Io = filter1_Low(&Filter_Io, ((float)(AIN_buf[I_o]-CD_DATA.O_Io)*CD_DATA.K_Io));//фильтрую, убираю постоянную,  теперь он +-
+ // --- Расчет New_Iomax ---
+  float current_raw = (float)AIN_buf[Io_max];
+  float offset = (float)CD_DATA.O_Iomax;
+  float gain = CD_DATA.K_Iomax;
+  float input_to_filter = (current_raw - offset) * gain;
+  New_Iomax = filter1_Low(&Filter_Iomax, input_to_filter);
+
+  // --- Расчет New_Io ---
+  float raw_io = (float)AIN_buf[I_o];
+  float offset_io = (float)CD_DATA.O_Io;
+  float coeff_io_filter = CD_DATA.K_Io; 
+  float val_to_filter = (raw_io - offset_io) * coeff_io_filter;
+  New_Io = filter1_Low(&Filter_Io, val_to_filter);
   
+  // --- Расчет REFIN ---
   REFIN = REF_DEF/((float)AIN_buf[U_Ref]);
   
-  fIomax = New_Iomax * REFIN * CD_DATA.K_Iomax;
-  fIo = New_Io * REFIN * CD_DATA.K_Io;
-   
+  // --- Расчет fIomax ---
+  float current_val_final = New_Iomax;
+  float coeff_val_final = CD_DATA.K_Iomax;
+  fIomax = current_val_final * REFIN * coeff_val_final;
+  
+  // --- Расчет fIo ---
+  float current_io_final = New_Io;
+  float coeff_io_final = CD_DATA.K_Io; 
+  fIo = current_io_final * REFIN * coeff_io_final;
+
+  // --- Накопление энергии для RMS ---
   E_Iomax += fIomax * fIomax;
   E_Io += fIo * fIo;
   
-  Cnt_50hz ++;
+  Cnt_50hz++;
   
   if(Cnt_50hz == DMA_50HZ)
   {
-  E_Iomax_global = E_Iomax/DMA_50HZ;
-  E_Io_global = E_Io/DMA_50HZ;
+    E_Iomax_global = E_Iomax / (float)DMA_50HZ;
+    E_Io_global = E_Io / (float)DMA_50HZ;
  
-  RAM_DATA.Iomax = RMS_sqrt(E_Iomax_global);
-  RAM_DATA.Io = RMS_sqrt(E_Io_global);
-  RAM_DATA.U_REF = AIN_buf[U_Ref]; //оценка внутреннего референса
+    RAM_DATA.Iomax = RMS_sqrt(E_Iomax_global);
+    RAM_DATA.Io = RMS_sqrt(E_Io_global);
+    RAM_DATA.U_REF = AIN_buf[U_Ref]; // оценка внутреннего референса
   
-  E_Iomax = 0;
-  E_Io = 0;
-  Cnt_50hz =0;
-  }  
+    E_Iomax = 0;
+    E_Io = 0;
+    Cnt_50hz = 0;
+  }
 
   //--- Фиксация данных внешнего АЦП (TLC1549) ---
   while(DMA_GetFlagStatus(DMA2_Stream0, DMA_FLAG_TCIF0) == RESET);

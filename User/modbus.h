@@ -4,7 +4,9 @@
 
 //адреса оперативной памяти дисплея
 #define r_min_RAM_DATA 0x0000
-#define r_max_RAM_DATA 0x107F
+//#define r_max_RAM_DATA 0x107F
+
+const uint16_t r_max_RAM_DATA = 0x107F;
 
 
 //диапазон адресов уставок 

@@ -7,11 +7,12 @@
 #include "flashdata.h"//тут у нас хранятся уставки для настройки интерфейса
 #include "CDdata.h"//тут у нас хранятся уставки для настройки интерфейса
 #include "modbus.h"//тут есть функция декодирования принятого сообщения
+#include "uart1toRS485.h"
 
 
 TClient uart1data;
 void Rx1DMA (void);//настройка DMA на чтение данных из UART1
-void Tx1DMA (void);//настройка DMA на передачу данных в UART1
+//void Tx1DMA (void);//настройка DMA на передачу данных в UART1
 void U1_SetModbusTimerForWaitTransmit(void);
 #define SetDIR1ToRX    GPIOA->BSRRH |= GPIO_Pin_8
 #define SetDIR1ToTX    GPIOA->BSRRL |= GPIO_Pin_8
@@ -145,6 +146,9 @@ u16 U1_SwCNT (void)
   }
   else return 0;
 }
+//--------------------------------------------------
+
+
 
 
 void Tx1DMA(void) {//настройка DMA на передачу данных в UART

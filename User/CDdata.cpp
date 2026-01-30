@@ -10,7 +10,12 @@
   * @«аметки:
   ******************************************************************************
   */
+#ifndef CDDATA_H
+#define CDDATA_H
+
+
 #include "modbus_data.h"//содержит описани€ структур данных
+#include "CDdata.h"
 #pragma section = ".cdsection"
 const TCD_DATA CD_DATA @ ".cdsection" =
 {
@@ -46,3 +51,4 @@ const TCD_DATA CD_DATA @ ".cdsection" =
 //   1.0,
 //   1.0
 };
+  #endif

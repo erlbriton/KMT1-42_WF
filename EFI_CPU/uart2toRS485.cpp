@@ -7,11 +7,12 @@
 #include "flashdata.h"//тут у нас хранятся уставки для настройки интерфейса
 #include "CDdata.h"//тут у нас хранятся уставки для настройки интерфейса
 #include "modbus.h"//тут есть функция декодирования принятого сообщения
-
+#include "uart2toRS485.h"
 
 TClient uart2data;
 void Rx2DMA (void);//настройка DMA на чтение данных из UART2
 void Tx2DMA (void);//настройка DMA на передачу данных в UART2
+TFLASH_DATA FLASH_DATA;
 
 //#define SetDIR2ToRX    GPIOC->BSRRH |= GPIO_Pin_12
 #define SetDIR2ToTX    GPIOC->BSRRL |= GPIO_Pin_12

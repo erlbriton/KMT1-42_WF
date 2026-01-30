@@ -50,36 +50,36 @@ void ThyristorON(u8 Phase_Pol){
 }*/
 
 //шим ключом тиристоров
-void TIM3_IRQHandler(void)
-{
-   TIM3->SR = 0;
-}
+// void TIM3_IRQHandler(void)
+// {
+//    TIM3->SR = 0;
+// }
 
 
 
 /******************************************************************************/
-void TIM2_IRQHandler(void){ 
+// void TIM2_IRQHandler(void){ 
   
-    if (TIM2->SR & TIM_IT_CC1)
-   {
-     TIM2->SR = 0;     
-    // if(Pwm_A_disable == 0)ThyristorON(TIM_A_plus); //отсчитался угол, включаем шим - импульс управления тиристором
-   } 
-  if (TIM2->SR & TIM_IT_CC2)
-   { 
-     TIM2->SR = 0;
-    // ThyristorOFF(TIM_A_plus); //импульс кончился, выкл шим     
-   }
-    if (TIM2->SR & TIM_IT_CC3)
-   {
-     TIM2->SR = 0;      
-    // if(Pwm_A_disable == 0)ThyristorON(TIM_A_minus); 
-   } 
-   if (TIM2->SR & TIM_IT_CC4)
-   { 
-     TIM2->SR = 0;
-    // ThyristorOFF(TIM_A_minus);   
-   }
+//     if (TIM2->SR & TIM_IT_CC1)
+//    {
+//      TIM2->SR = 0;     
+//     // if(Pwm_A_disable == 0)ThyristorON(TIM_A_plus); //отсчитался угол, включаем шим - импульс управления тиристором
+//    } 
+//   if (TIM2->SR & TIM_IT_CC2)
+//    { 
+//      TIM2->SR = 0;
+//     // ThyristorOFF(TIM_A_plus); //импульс кончился, выкл шим     
+//    }
+//     if (TIM2->SR & TIM_IT_CC3)
+//    {
+//      TIM2->SR = 0;      
+//     // if(Pwm_A_disable == 0)ThyristorON(TIM_A_minus); 
+//    } 
+//    if (TIM2->SR & TIM_IT_CC4)
+//    { 
+//      TIM2->SR = 0;
+//     // ThyristorOFF(TIM_A_minus);   
+//    }
     
-}
+// }
 

@@ -24,6 +24,7 @@
   */
 #include <stdio.h>
 #include "stm32f4xx.h"// basic types
+#include "id.h"
 
 
 char DeviceID[256];//массив для формирования ID-строки
@@ -37,7 +38,7 @@ char DeviceID[256];//массив для формирования ID-строки
   * @param  u32 SN - серийный номер устросйтва, число от 1 до 99999999
   * @retval none.
   */
-void IDinit(u32 SN, char* ID_text)
+void IDinit(u32 SN, const char* ID_text)
 {
   char nulls[8];
   u8 strcnt;

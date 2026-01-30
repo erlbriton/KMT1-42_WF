@@ -1,3 +1,4 @@
+#include "uart2toRS485.h"
 #include "mbtypes.h"
 #include "bastypes.h"
 #include "modbus.h"
@@ -15,6 +16,7 @@ void ModbusRamRead(u32 DATA_BASE, TClient *pC);
 void ModbusRamWrite(TClient *pC);//u32 DATA_BASE, 
 void ModbusCDWrite(TClient *pC);//запись калибровочных данных u32 DATA_BASE, 
 void ModbusFlashWrite(TClient *pC);//u32 DATA_BASE, 
+TFLASH_DATA BKFLASH_DATA;
 
 void frame_end(TClient *pC)
 {
@@ -43,7 +45,6 @@ u8 j;
    pC->TXCount+=2;//прибавить длину заголовка
    frame_end(pC);
 }
-
 bool ModbusMemRead(TClient *pC)
 {
   u16 addrtt;
@@ -59,10 +60,11 @@ bool ModbusMemRead(TClient *pC)
   //RAM_DATA
     
   //оперативные данные 
-    if ((addrtt >= r_min_RAM_DATA)&&(addrtt < r_max_RAM_DATA))
+   // if ((addrtt >= r_min_RAM_DATA)&&(addrtt < r_max_RAM_DATA))//Было так, чтобы работало если r_min_RAM_DATA !=0
+      if (addrtt < r_max_RAM_DATA)
     {
       ModbusRamRead((u32)&RAM_DATA, pC);
-      return (TRUE);
+      return (true);
     }  
   
   
@@ -70,19 +72,19 @@ bool ModbusMemRead(TClient *pC)
   if ((addrtt >= r_min_FLASH_DATA)&&(addrtt < r_max_FLASH_DATA)) 
   {
     ModbusRamRead((u32)&FLASH_DATA, pC);
-    return (TRUE);
+    return (true);
   }
   
   //CD_DATA данные калибровочные 
   if ((addrtt >= r_min_CD_DATA)&&(addrtt < r_max_CD_DATA))
   {
     ModbusRamRead((u32)&CD_DATA, pC);
-    return (TRUE);
+    return (true);
   }
 
   //не нашёл подходящей области
   //ModbusDataRetranslate(&lnks_RTR_WRITE, pC, TRUE);//пробую ретранслировать, вдруг Устройство знает
-  return (FALSE);
+  return (false);
 }
 
 
@@ -98,10 +100,11 @@ bool ModbusMemWrite(TClient *pC){
   
   
   //RAM_DATA
-  if ((addrtt >= r_min_RAM_DATA) && (addrtt < r_max_RAM_DATA))
+  //if ((addrtt >= r_min_RAM_DATA) && (addrtt < r_max_RAM_DATA))Было так, чтобы работало если r_min_RAM_DATA !=0
+    if (addrtt < r_max_RAM_DATA)
   {
     ModbusRamWrite(pC);//(u32)&RAM_DATA, 
-    return(TRUE);
+    return(true);
   } 
 
   //Уставки 
@@ -111,7 +114,7 @@ bool ModbusMemWrite(TClient *pC){
     ModbusFlashWrite(pC);//(u32)&FLASH_DATA, 
     //сравнить BPS и DEVADDR для UART2 если отличаются, то сделать повторнуюю инициализацию    
     //uart2rs485_ReInit();?????????????
-    return (TRUE);
+    return (true);
   }
   
   //калибровочные данные
@@ -120,11 +123,11 @@ bool ModbusMemWrite(TClient *pC){
     ModbusCDWrite(pC);//(u32)&CD_DATA, 
     uart2to485_ReInit();
 
-    return (TRUE);
+    return (true);
   }
   //не нашёл подходящей области
   //ModbusDataRetranslate(&lnks_RTR_WRITE, pC, TRUE);//пробую ретранслировать, вдруг Устройство знает
-  return (FALSE);
+  return (false);
 }
 
 void ModbusRamRead(u32 DATA_BASE, TClient *pC)
@@ -212,7 +215,7 @@ void ModbusCDWrite(TClient *pC)//u32 DATA_BASE,
 }
 
 void ModbusFlashWrite(TClient *pC){//u32 DATA_BASE,
-  u8 flash_ok=0;
+ // u8 flash_ok=0;
   bauint w;
   u32 i;
   volatile bauint crc, _crc;
@@ -254,7 +257,7 @@ void ModbusFlashWrite(TClient *pC){//u32 DATA_BASE,
        //7)стереть основной сектор флэша
        //8)записать туда данные из временного буфера
        FlashSectorWrite((u32)&FLASH_DATA, (u32) &FlashTmpBuffer);
-       flash_ok=1;
+    //   flash_ok=1;
   }
   else 
   {
@@ -285,19 +288,19 @@ bool command_decode(TClient *pC)
       switch (cmd){
 	case 0x03: if (ModbusMemRead(pC)) 
         {
-          return (TRUE);//чтение
+          return (true);//чтение
         }
-                   return (FALSE);
+                   return (false);
 	case 0x10: if (ModbusMemWrite(pC))
         {
-          return (TRUE);
+          return (true);
         }//запись
-                   return (FALSE);
+                   return (false);
 	case 0x11: GetDeviceID(pC);//чтение ID-строки
-                   return (TRUE); //
-	default:  return (FALSE);//команда не распознана
+                   return (true); //
+	default:  return (false);//команда не распознана
       };
     };
   };
-  return (FALSE);//контрольная сумма не сошлась, либо адрес не совпал
+  return (false);//контрольная сумма не сошлась, либо адрес не совпал
 }

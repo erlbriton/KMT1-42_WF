@@ -14,7 +14,7 @@
 #include "ramdata.h"
 #include "flashdata.h"
 #include "CDdata.h"
-#include "rtc.h"
+//#include "rtc.h"
 extern "C" {
 #include "uart1toRS485.h"//
 #include "uart2toRS485.h"//
@@ -35,7 +35,7 @@ extern "C" {
 void  data_init(void);   
 /* Private variables ---------------------------------------------------------*/  
 
-char* IDtext  ="KMT1-42 ver.2.0.0 22.01.2026 www.intmash.ru";
+const char* IDtext = "KMT1-42 ver.2.0.0 22.01.2026 www.intmash.ru";
 /**
   * @brief  Main program.
   

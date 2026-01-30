@@ -7,6 +7,7 @@
 #include "crc16.h"
 #include "mbtypes.h"
 #include "AIO.h"
+#include "EFI_CPU.h"
 
 //параметры фильтра
 #define F_again 1 //коэффициент усиления
