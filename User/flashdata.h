@@ -1,25 +1,30 @@
-/*
+/**
+  ******************************************************************************
   * @file    flashdata.h
   * @author  IMD, Sledin
   * @version V1.0.0
   * @date    18-06-2013
   * @brief   ‘айл содержит объ€вление структур, располагаемых в основном и 
   * резервном секторах уставок во FLASH пам€ти микроконтроллера.
+  ******************************************************************************
+  * @«аметки:
+  *
+  * 
+  * 
+  * 
+  * 
+  * 
+  *
+  * 
+  ******************************************************************************
   */
 #ifndef FLASHDATA_H
 #define FLASHDATA_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "modbus_data.h"//содержит описани€ структур данных
-
 //параметры расположеные FLASH
+
 
 extern TFLASH_DATA FLASH_DATA;
 extern TFLASH_DATA BKFLASH_DATA;
 //extern TFLASH_DATA *settings;
-#ifdef __cplusplus
-}
-#endif
-#endif
+#endif 

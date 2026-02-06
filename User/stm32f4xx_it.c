@@ -37,8 +37,6 @@
 #include "AIO.h"   
 #include "DIO.h"
 
-#include "stm32f4xx_gpio.h"
-
 /** @addtogroup Template_Project
   * @{
   */
@@ -56,31 +54,36 @@
 #define T_DMA 100 //число микросекунд за одно дма
 #define MCSEC_TO_SEC 1000000 //преобразование микросекунд в секунды
 #define ERROR_SYNC 125 //125 счетов - частота 40Гц, это уже плохо, ошибка синхры 105 - 48Гц
-#define CS_ADC GPIOC, GPIO_Pin_8
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
   
-u8 RMS_Calc = 0; //флаг по которому считать в мейне
-u16 CNT_Iomax = 0; //содержимое таймеров сифу фаз abc
-//f32 Old_Iomax = 0;//старые значения напряжения фаз для расчета частоты
+u8 RMS_Calc = 0; //флаг? по которому считать в мейне
+u16 CNT_Uin_A = 0; //содержимое таймеров сифу фаз abc
+//f32 Old_Uin_A = 0;//старые значения напряжения фаз для расчета частоты
 f32 FreqA[5]; //массив для усреднения частоты
 u8 Polar_sync = 0; //полуволна + или -
 
-f32 New_Iomax = 0;
-f32 New_Io = 0;
+f32 New_Uin_A = 0;
+f32 New_Uin_B = 0;
 
 //сумматоры для действующих значений    
-static float E_Iomax;
-static float E_Io;
+static float E_Uin_A;
+static float E_Uin_B;
+static float E_Uload = 0;
 
 //Квадраты действующих значений
 
-float E_Iomax_global;
-float E_Io_global;
+float E_Uin_A_global;
+float E_Uin_B_global;
 
 const float REF_DEF = 1500.0;
 vf32 REFIN = 0;
- 
+
+static inline float RMS_sqrt(float x)
+{
+    return sqrt(x);
+}
+
 //модбас
 void TIM1_CC_IRQHandler(void)
 {  
@@ -90,11 +93,12 @@ void TIM1_CC_IRQHandler(void)
     U2_Timer();        
   }  
   
-  if ((TIM1->SR & TIM_IT_CC1)&&(TIM1->DIER & TIM_IT_CC1))//если прерывание вызвано паузой от USART1_to_USB
+  if ((TIM1->SR & TIM_IT_CC1)&&(TIM1->DIER & TIM_IT_CC1))//если прерывание вызвано паузой от USART1_to_OPT
   {
     TIM1->SR ^= TIM_IT_CC1; //снять флаг прерывания 
     U1_Timer();        
   }  
+  
 }
 
 //таймер дискретных входов выходов 
@@ -103,118 +107,96 @@ void TIM5_IRQHandler(void)
   TIM5->SR = 0;         
 }
 
-//void TIM6_DAC_IRQHandler(void)
-//{  
-//  TIM6->SR ^= TIM_IT_Update;
-//  DIO_work();  
-//  RAM_DATA.DI_reg = RAM_DATA.DI_reg& 0x00ff; //если этого не сделать, то старший байт будет ff, потому что читаю только один байт
-//}
-
-//u8 Enable_mtz=0;
-
-/*************************************************************************************************************/
-extern volatile uint16_t spi_rx_buffer;
-extern uint16_t spi_tx_dummy;
-
-void DMA2_Stream4_IRQHandler(void)//стрим ДМА, работающий с данными собственных аналоговых входов
+void TIM6_DAC_IRQHandler(void)
 {  
-  //--- Старт чтения внешнего АЦП (напряжение катушки) ---
-  GPIOC->BSRRH = GPIO_Pin_8; // CS -> LOW
-  DMA2_Stream0->NDTR = 1; 
-  DMA2_Stream3->NDTR = 1;
-  DMA_Cmd(DMA2_Stream0, ENABLE); 
-  DMA_Cmd(DMA2_Stream3, ENABLE);
-  //-----------------------------------------------------
+  TIM6->SR ^= TIM_IT_Update;
+  DIO_work();  
+  RAM_DATA.DI_reg = RAM_DATA.DI_reg& 0x00ff; //если этого не сделать, то старший байт будет ff, потому что читаю только один байт
+}
 
-  //static u16  Cnt_100hz = 0; //счетчик для усреднения по 100 Гц 
+int a = 0;
+void DMA2_Stream0_IRQHandler(void)//стрим ДМА, работающий с данными собственных аналоговых входов
+{  
+   DMA2->LIFCR = (uint32_t) (DMA_FLAG_FEIF0 | DMA_FLAG_DMEIF0 | DMA_FLAG_TEIF0 | DMA_FLAG_HTIF0 | DMA_FLAG_TCIF0);//почистим флаги стрима ДМА
+  static u16 Cnt_100hz = 0; //счетчик для усреднения по 100 Гц 
   static u16 Cnt_50hz = 0; //счетчик для усреднения по периоду
-  float fIomax = 0;
-  float fIo = 0;
-   
-//=========================Измерение переменного  тока=================================================  
-
- // --- Расчет New_Iomax ---
-  float current_raw = (float)AIN_buf[Io_max];
-  float offset = (float)CD_DATA.O_Iomax;
-  float gain = CD_DATA.K_Iomax;
-  float input_to_filter = (current_raw - offset) * gain;
-  New_Iomax = filter1_Low(&Filter_Iomax, input_to_filter);
-
-  // --- Расчет New_Io ---
-  float raw_io = (float)AIN_buf[I_o];
-  float offset_io = (float)CD_DATA.O_Io;
-  float coeff_io_filter = CD_DATA.K_Io; 
-  float val_to_filter = (raw_io - offset_io) * coeff_io_filter;
-  New_Io = filter1_Low(&Filter_Io, val_to_filter);
+  float fUin_A = 0;
+  float fUin_B = 0;
+  float fU_load = 0;
   
-  // --- Расчет REFIN ---
+//=========================Измерение переменного  тока================================================= 
+ 
+  New_Uin_A= filter2_Bandpass(&Filter_Uin_A, (float)AIN_buf[Ua_in]); //фильтрую, убираю постоянную,  теперь он +-
+  New_Uin_B = filter2_Bandpass(&Filter_Uin_B,(float)AIN_buf[Ub_in]); //фильтрую, убираю постоянную,  теперь он +-
+  
+  //AIOdataInit();
   REFIN = REF_DEF/((float)AIN_buf[U_Ref]);
   
-  // --- Расчет fIomax ---
-  float current_val_final = New_Iomax;
-  float coeff_val_final = CD_DATA.K_Iomax;
-  fIomax = current_val_final * REFIN * coeff_val_final;
-  
-  // --- Расчет fIo ---
-  float current_io_final = New_Io;
-  float coeff_io_final = CD_DATA.K_Io; 
-  fIo = current_io_final * REFIN * coeff_io_final;
+  fUin_A = New_Uin_A * REFIN * CD_DATA.K_Uin_A;
+  fUin_B = New_Uin_B * REFIN * CD_DATA.K_Uin_B;
 
-  // --- Накопление энергии для RMS ---
-  E_Iomax += fIomax * fIomax;
-  E_Io += fIo * fIo;
+  E_Uin_A += fUin_A * fUin_A;
+  E_Uin_B += fUin_B * fUin_B;
   
-  Cnt_50hz++;
+  Cnt_50hz ++;
   
   if(Cnt_50hz == DMA_50HZ)
   {
-    E_Iomax_global = E_Iomax / (float)DMA_50HZ;
-    E_Io_global = E_Io / (float)DMA_50HZ;
- 
-    RAM_DATA.Iomax = RMS_sqrt(E_Iomax_global);
-    RAM_DATA.Io = RMS_sqrt(E_Io_global);
-    RAM_DATA.U_REF = AIN_buf[U_Ref]; // оценка внутреннего референса
+  E_Uin_A_global = E_Uin_A/DMA_50HZ;
+  E_Uin_B_global = E_Uin_B/DMA_50HZ;
+
+  RAM_DATA.Uin_A = RMS_sqrt(E_Uin_A_global);
+  RAM_DATA.Uin_B = RMS_sqrt(E_Uin_B_global);
+  RAM_DATA.U_REF = AIN_buf[U_Ref]; //оценка внутреннего референса
   
-    E_Iomax = 0;
-    E_Io = 0;
-    Cnt_50hz = 0;
+  //RMS_Calc = 1;//флаг, по которому считать рмс в мейне
+  E_Uin_A = 0;
+  E_Uin_B = 0;
+  Cnt_50hz =0;
   }
+  
+  fU_load = ((float)AIN_buf[U_load] * REFIN - CD_DATA.O_Uload) * CD_DATA.K_Uload;//преобразовали в реальн вольты и нормировали по внутр рефу 
+  E_Uload += fU_load;
+  Cnt_100hz ++;
+  if (Cnt_100hz == DMA_100HZ) //пришло время считать
+  {
+    RAM_DATA.Uload = (E_Uload)/DMA_100HZ;
+    E_Uload = 0;
+    Cnt_100hz = 0;
+    
+  }
+}
+/******************************************************************************/
 
-  //--- Фиксация данных внешнего АЦП (TLC1549) ---
-  while(DMA_GetFlagStatus(DMA2_Stream0, DMA_FLAG_TCIF0) == RESET);
-  GPIOC->BSRRL = GPIO_Pin_8; // CS -> HIGH
-  RAM_DATA.Uout = (uint16_t)(spi_rx_buffer >> 6);
-  DMA2->LIFCR = (uint32_t)(DMA_FLAG_TCIF0 | DMA_FLAG_TCIF3 | DMA_FLAG_FEIF0 | DMA_FLAG_FEIF3);
 
-  // Очистка флагов для Stream 4 (используется регистр HIFCR)
-  DMA2->HIFCR = (uint32_t)(DMA_FLAG_FEIF4 | DMA_FLAG_DMEIF4 | DMA_FLAG_TEIF4 | DMA_FLAG_HTIF4 | DMA_FLAG_TCIF4);
+
+void EXTI0_IRQHandler(void){  
+  EXTI->PR = EXTI_Line0;
+  
 }
 
 
 /******************************************************************************/
-//Прерывание по кнопке настройки
-// void EXTI9_5_IRQHandler(void) {
-//     // Проверяем, что прерывание вызвано именно линией 8 (A8)
-//     if (EXTI_GetITStatus(EXTI_Line8) != RESET) {
-        
-//         // --- ВАШ КОД ДЛЯ A8 (Rising Edge) ЗДЕСЬ ---
-        
-//         // Обязательно сбрасываем флаг, чтобы прерывание не вызывалось бесконечно
-//         EXTI_ClearITPendingBit(EXTI_Line8);
-//     }
-// }
 
-//Прерывание по кнопке открывания тормоза
-// void EXTI15_10_IRQHandler(void) {
-//     // Проверяем, что прерывание вызвано именно линией 10 (B10)
-//     if (EXTI_GetITStatus(EXTI_Line10) != RESET) {
-        
-//         // --- ВАШ КОД ДЛЯ B10 (Rising Edge) ЗДЕСЬ ---
-        
-//         // Обязательно сбрасываем флаг
-//         EXTI_ClearITPendingBit(EXTI_Line10);
-//     }
-// }
+void EXTI9_5_IRQHandler(void){
+  
+  if (EXTI->PR & EXTI_Line7){
+    EXTI->PR = EXTI_Line7;
+   
+  }
+  if (EXTI->PR & EXTI_Line8){
+    EXTI->PR = EXTI_Line8;
+     }
+  if (EXTI->PR & EXTI_Line9){
+    EXTI->PR = EXTI_Line9;
+  }
+  
+  
+  
+}
+
+
+
 
 /******************************************************************************/
 /*            Cortex-M4 Processor Exceptions Handlers                         */

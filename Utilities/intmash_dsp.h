@@ -1,10 +1,3 @@
-#ifndef INTMASH_DSP_H    // Проверка: если файл еще не был включен...
-#define INTMASH_DSP_H    // ...то помечаем, что мы его включаем
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <math.h>
 #include "stm32f4xx.h"
 // consts---------------------------------------
@@ -373,8 +366,3 @@ static inline float PID_f32(PID_f32_struct* PID, float error, float position){
   else if (PIDout < (PID->outMin)) return (PID->outMin);
   return PIDout;
 }
-#ifdef __cplusplus
-}
-#endif
-
-#endif // INTMASH_DSP_H

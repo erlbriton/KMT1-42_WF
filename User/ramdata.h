@@ -2,7 +2,7 @@
 /**
   ******************************************************************************
   * @file    ramdata.h
-  * @author  Vasiltsov
+  * @author  IMD, Sledin
   * @version V1.0.0
   * @date    18-06-2013
   * @brief   ‘айл содержит объ€вление структуры общедоступных переменных (дл€
@@ -22,17 +22,23 @@
   * на какие пины каких портов посажены сигналы управлени€, смотри схему)
   ******************************************************************************
   */
-// #define LED_ALRM_ON    GPIOC->BSRRH = GPIO_Pin_13
-// #define LED_ALRM_OFF   GPIOC->BSRRL = GPIO_Pin_13
-// #define LED_ALRM_ST    (GPIOC->ODR & GPIO_Pin_13)
-#define LED_LINK_OFF   GPIOB->BSRRH = GPIO_Pin_1
-#define LED_LINK_ON    GPIOB->BSRRL = GPIO_Pin_1
-#define LED_LINK_ST    (GPIOB->ODR & GPIO_Pin_1)
+#define LED_ALRM_ON    GPIOC->BSRRH = GPIO_Pin_13
+#define LED_ALRM_OFF   GPIOC->BSRRL = GPIO_Pin_13
+#define LED_ALRM_ST    (GPIOC->ODR & GPIO_Pin_13)
+#define LED_LINK_OFF   GPIOC->BSRRH = GPIO_Pin_14
+#define LED_LINK_ON    GPIOC->BSRRL = GPIO_Pin_14
+#define LED_LINK_ST    (GPIOC->ODR & GPIO_Pin_14)
     
+  
+
 //параметры расположеные RAM
 extern TRAM_DATA RAM_DATA;
+
 extern u16 FLASH_change;
 extern u16 period_over;
-extern u16 AIN_buf[3];
+
+extern u16 AIN_buf[12];
+
+
 
 #endif

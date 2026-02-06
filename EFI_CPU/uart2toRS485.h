@@ -1,9 +1,4 @@
-#ifndef UART2TO485_H
-#define UART2TO485_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "bastypes.h"
 
   
@@ -12,9 +7,5 @@ extern "C" {
     extern u16  U2_SwCNT (void);
     extern void U2_Timer (void);
 
-#ifdef __cplusplus
-}
-#endif
 
-#endif
 

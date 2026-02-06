@@ -5,22 +5,26 @@
   * @version V1.0.0
   * @date    18-06-2013
   * @brief  Модуль, формирующий ID-строку устройства
+  ******************************************************************************
+  * @Заметки:
+  *
+  * 
+  * 
+  * 
+  * 
+  * 
+  *
+  * 
+  ******************************************************************************
   */
 #ifndef ID_H
 #define ID_H
+#include "stm32f4xx.h"// basic types
 
-#ifdef __cplusplus
-extern "C" {
+
+extern char DeviceID[256];//объявление символьного массива для ID-строки
+
+extern void IDinit(u32 SN, char* ID_text);//функция, формирующая ID-строку
+
+
 #endif
-
-#include "stm32f4xx.h"
-
-extern char DeviceID[256];
-extern void IDinit(u32 SN, const char* ID_text);
-
-
-#ifdef __cplusplus
-} // Закрываем extern "C"
-#endif
-
-#endif // Закрываем Guard ID_H (это должно быть в самом конце!)

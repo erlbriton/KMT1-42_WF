@@ -8,8 +8,8 @@ typedef struct {
         
     bavu16 MB_RS485_2;//1
     //уставки работы
-    // vu16 TiristPulseWith;//2 сколько шимить тиристором в мкс
-    // vu16 TirPWM_Pulse; // 3пустая
+    vu16 TiristPulseWith;//2 сколько шимить тиристором в мкс
+    vu16 TirPWM_Pulse; // 3пустая
 
     
  } TFLASH_DATA;
@@ -27,11 +27,29 @@ typedef struct  {
 //    u16 lnk_mngr_t_DIR;//7
   //  vu16 Z; //7 пустая 
 
-    vf32 O_Iomax; //89
-    vf32 O_Io; //ab
+    vf32 O_Uin_A; //89
+    vf32 O_Uin_B; //ab
+    vf32 O_Uin_C; //cd
+    vf32 O_Uout_A; //ef
+    vf32 O_Uout_B; //1011
+    vf32 O_Uout_C; //1213
+    vf32 O_Ia; //1415
+    vf32 O_Ib;
+    vf32 O_Ic;
+    vf32 O_Iload;
+    vf32 O_Uload;
        
-    vf32 K_Iomax;//1c1d
-    vf32 K_Io;//1819 
+    vf32 K_Uin_A;//1c1d
+    vf32 K_Uin_B;//1819 
+    vf32 K_Uin_C;//1a1b 
+    vf32 K_Uout_A;//1e1f
+    vf32 K_Uout_B;//1c1d
+    vf32 K_Uout_C;//2021
+    vf32 K_Ia;//22,23 
+    vf32 K_Ib;//2425
+    vf32 K_Ic;
+    vf32 K_Iload;
+    vf32 K_Uload;
     
  } TCD_DATA;
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,10 +102,18 @@ typedef  struct {
     u16 DI_reg; //02 l
     u16 DO_reg; //03 h
     
-    vf32 Iomax;
-    vf32 Io;  
-    vf32 U_REF; 
-    vf32 Uout;
+    vf32 Uin_A;
+    vf32 Uin_B; 
+    vf32 Uin_C; 
+    vf32 Uout_A; 
+    vf32 Uout_B; 
+    vf32 Uout_C; 
+    vf32 Ia; 
+    vf32 Ib; 
+    vf32 Ic; 
+    vf32 Iload;
+    vf32 Uload;
+    u16 U_REF;
     
 } TRAM_DATA;
 ///////////////////////////////////////////////////////////////////////////////

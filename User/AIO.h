@@ -16,9 +16,18 @@ fIin= (((float)AIN[I_IN_AIN])*REF_DEF/((float)AIN[REF_AIN]) - ((float)CD_DATA.0a
 #define AIO_H
 
 //девайны индексов каждого сигнала в буфере АЦП
-#define Io_max 0
-#define I_o    1
-#define U_Ref  2
+#define Ua_in   0
+#define Ub_in   1
+#define Uc_in   2
+#define Ua_out  3
+#define Ub_out  4
+#define Uc_out  5
+#define I_a     6
+#define I_b     7
+#define I_c     8
+#define I_load  9
+#define U_load  10
+#define U_Ref   11
 
 
 //дефайны реверенсов
@@ -28,30 +37,52 @@ fIin= (((float)AIN[I_IN_AIN])*REF_DEF/((float)AIN[REF_AIN]) - ((float)CD_DATA.0a
 //#define REF_COMPENS REFIN = REF_DEF/((float)AIN_buf[U_REF])
 
 //калибровочные данные 
-// extern float Kadc_Uload;
-// extern float Kadc_Iload;
-// extern float Kadc_Iin;
-// extern float Kadc_Uin;
-// extern float Kadc_Udac1;
-// extern float Kadc_Udac2;
-// extern float Kadc_Uadc6;
-// extern float Kadc_Uadc7;
+extern float Kadc_Uload;
+extern float Kadc_Iload;
+extern float Kadc_Iin;
+extern float Kadc_Uin;
+extern float Kadc_Udac1;
+extern float Kadc_Udac2;
+extern float Kadc_Uadc6;
+extern float Kadc_Uadc7;
 
-// extern float Oadc_Uload;
-// extern float Oadc_Iload;
-// extern float Oadc_Iin;
-// extern float Oadc_Udac1;
-// extern float Oadc_Udac2;
-// extern float Oadc_Uadc6;
-// extern float Oadc_Uadc7;
+extern float Oadc_Uload;
+extern float Oadc_Iload;
+extern float Oadc_Iin;
+extern float Oadc_Udac1;
+extern float Oadc_Udac2;
+extern float Oadc_Uadc6;
+extern float Oadc_Uadc7;
 
 //преобразованные данные (мгновенные)
-extern float fIomax;
-extern float fIo;
+extern float fUin_A;
+extern float fUin_B;
+extern float fUin_C;
+extern float fUout_A;
+extern float fUout_B;
+extern float fUout_C;
+extern float fIa;
+extern float fIa;
+extern float fIb;
+extern float fIc;
+extern float fUload;
+extern float fIload;
   
 //преобразованные данные (усредненные)
-extern float fIomax_Ave;
-extern float fIo_Ave;
+extern float fUin_A_Ave;
+extern float fUin_B_Ave;
+extern float fUin_C_Ave;
+extern float fUout_A_Ave;
+extern float fUout_B_Ave;
+extern float fUout_C_Ave;
+extern float fIa_Ave;
+extern float fIb_Ave;
+extern float fIc_Ave;
+extern float fUload_Ave;
+extern float fIload_Ave;
+
+
+
 
 //функции расчета калибровочных данных
 void AIOdataInit(void);
